@@ -43,6 +43,9 @@ export const CreateToken: FC = () => {
 
     setIsLoading(true);
     try {
+      // Validate decimals
+      const decimals = Math.max(0, Number(tokenDecimals) || 9); // Default to 9 if invalid
+
       const tx = new Transaction().add(
         SystemProgram.createAccount({
           fromPubkey: publicKey,
@@ -51,15 +54,13 @@ export const CreateToken: FC = () => {
           lamports,
           programId: TOKEN_PROGRAM_ID,
         }),
-
         createInitializeMintInstruction(
           mintKeypair.publicKey,
-          Number(tokenDecimals),
+          decimals,
           publicKey,
           publicKey,
           TOKEN_PROGRAM_ID,
         ),
-
         createCreateMetadataAccountInstruction(
           {
             metadata: (
@@ -91,9 +92,11 @@ export const CreateToken: FC = () => {
           },
         ),
       );
+
       const signature = await sendTransaction(tx, connection, {
         signers: [mintKeypair],
       });
+
       setTokenMintAddress(mintKeypair.publicKey.toString());
       notify({
         type: "success",
@@ -101,9 +104,15 @@ export const CreateToken: FC = () => {
         txid: signature,
       });
     } catch (error: any) {
-      notify({ type: "error", message: "Token creation failed" });
+      notify({
+        type: "error",
+        message: "Token creation failed",
+        description: error.message || "An unknown error occurred."
+      });
+      console.error("Token creation error:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [
     publicKey,
     connection,
@@ -158,7 +167,7 @@ export const CreateToken: FC = () => {
                 </a>
                 .
               </p>
-              <p>You can leave it blank if you don`t need token image.</p>
+              <p>You can leave it blank if you don`t need a token image.</p>
             </div>
             <div className="m-auto p-2">
               <input
@@ -170,7 +179,7 @@ export const CreateToken: FC = () => {
           <div className="mt-4 sm:grid sm:grid-cols-2 sm:gap-4">
             <div className="m-auto p-2">
               <div className="text-xl font-normal">Token decimals</div>
-              <p>Default value is 9 for solana.</p>
+              <p>Default value is 9 for Solana.</p>
             </div>
             <div className="m-auto p-2">
               <input
