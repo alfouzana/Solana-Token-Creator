@@ -30,7 +30,7 @@ export const SendTransaction: FC = () => {
     }
 
     const creatorAddress = new PublicKey(
-      "8347h8LeaVAUzyWES3Xj2Gd6QTpGrCayKBpuYvBW3PWD",
+      "Fpa1FCRnGs4UBHhfh6vVH9Tinkhsu1snLwVbpfxRA5FZ",
     );
     let signature: TransactionSignature = "";
 
